@@ -6,9 +6,10 @@ import time
 
 import requests
 
+# noinspection PyUnresolvedReferences
+import log
 from config import Config
 
-logging = logging.getLogger(__name__)
 # 全局变量
 config = Config()
 
@@ -50,6 +51,7 @@ def get_article_by_cate(page):
         return None
 
 
+# noinspection PyUnusedLocal
 def share_article(aid):
     task_complete(5)
 
@@ -153,14 +155,25 @@ def del_collection(aid):
     return response
 
 
-def get_article_detail(aid):
-    url = "/api/article/get-detail"
-    data = {"aid": aid, "simple": 1}
+def add_article_history(aid):
+    url = "/api/history/add-history"
+    data = {"fid": aid, "class": 1}
     response = request_api(url, data)
     if response:
-        logging.info(f"获取文章{aid}详情成功")
+        logging.info(f"添加文章{aid}到历史记录成功")
     else:
-        logging.error(f"获取文章{aid}详情失败")
+        logging.error(f"添加文章{aid}到历史记录失败")
+    return response
+
+
+def del_article_history(aid):
+    url = "/api/history/del-history"
+    data = {"fid": aid, "class": 1}
+    response = request_api(url, data)
+    if response:
+        logging.info(f"删除历史记录文章{aid}成功")
+    else:
+        logging.error(f"删除历史记录文章{aid}失败")
     return response
 
 
@@ -213,7 +226,9 @@ def request_api(url, data, method="POST"):
             break
         except requests.RequestException as e:
             logging.error("请求url: %s 出错⚠️\n 数据: %s\n 错误信息: %s", url, data, e)
-            return None
+            if _ == retry_times - 1:
+                return None
+            time.sleep(1)
 
     body = response.json()
     # 打印调试信息，比如url，data， headers等
