@@ -1,11 +1,11 @@
 import logging
 import os
-
+# noinspection PyUnresolvedReferences
+import log
 import toml
 from onepush import get_notifier
 
 logging = logging.getLogger(__name__)
-
 
 class Singleton(type):
     _instances = {}

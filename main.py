@@ -2,6 +2,11 @@
 cron: 2 1 * * *
 new Env('LK签到');
 """
+from datetime import datetime
+# noinspection PyUnresolvedReferences
+import log
+# noinspection PyUnresolvedReferences
+import logging
 from api import *
 from config import Config
 
@@ -23,7 +28,7 @@ def process_tasks():
     user_pre = get_user_liteInfo()
     # 定义任务ID到函数的映射
     task_id_to_function = {
-        1: get_article_detail,
+        1: add_article_history,
         2: add_collection,
         3: pass_function,
         5: share_article,
@@ -40,12 +45,12 @@ def process_tasks():
         time.sleep(1)  # 防止请求过快
         success_count = 0
         task_list = get_tasks_list()
-        tasks = task_list.get('items')
-
-        if not tasks:
+        if not task_list:
             logging.error("无法获取任务列表，程序退出")
             fail_info.append("获取任务列表失败⚠️")
-            return
+            continue
+
+        tasks = task_list.get('items')
 
         for task in tasks:
             if task['status'] == 0:
@@ -65,20 +70,30 @@ def process_tasks():
                 success_info.append(msg) if status else fail_info.append(msg)
             elif task['status'] == 2:
                 success_count += 1
+                logging.info(f"任务{task_id_to_function.get(task['id']).__name__}已完成，跳过")
 
         try_time += 1
         if try_time > try_time_limit:
-            fail_info.append("尝试次数超过限制⚠️")
+            fail_info.append("完成task尝试次数超过限制⚠️")
+            logging.error("完成task尝试次数超过限制")
             break
 
     # 领取总任务奖励
-    task_list = get_tasks_list()
-    if task_list.get('status', 0) != 0:
-        status, msg = task_complete(task_list.get('id', 7))
-        success_info.append(msg) if status else fail_info.append(msg)
+    try:
+        task_list = get_tasks_list()
+        if task_list.get('status', 0) == 1:
+            status, msg = task_complete(task_list.get('id', 7))
+            success_info.append(msg) if status else fail_info.append(msg)
+        elif task_list.get('status', 0) == 0:
+            fail_info.append("总任务未完成⚠️")
+            logging.error("总任务未完成")
+    except Exception as e:
+        logging.error(f"领取总任务奖励失败⚠️{e}")
+        fail_info.append("领取总任务奖励失败⚠️")
 
-    # 删除收藏
+    # 删除收藏、历史记录
     del_collection(target_article_id)
+    del_article_history(target_article_id)
 
     # 获取硬币、经验
     user_post = get_user_liteInfo()
@@ -113,7 +128,12 @@ def main():
         process_tasks()
     except Exception as e:
         logging.error(f"主程序出现异常⚠️{e}")
-    config.save()
+        logging.exception(e)
+    try:
+        config.save()
+    except Exception as e:
+        logging.error(f"保存配置文件失败⚠️{e}")
+        logging.exception(e)
 
 
 if __name__ == "__main__":
