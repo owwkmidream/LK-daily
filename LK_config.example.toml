@@ -1,0 +1,19 @@
+enable = true
+debug_level = false
+host = ""
+
+[headers]
+User-Agent = "Mozilla/5.0"
+Content-Type = "charset=UTF-8"
+
+[payload]
+client = "web"
+
+[wechat_params]
+agentid = ""
+corpid = ""
+corpsecret = ""
+
+[user]
+username = ""
+password = ""
