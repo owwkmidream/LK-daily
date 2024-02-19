@@ -1,3 +1,7 @@
+"""
+cron: 2 1 * * *
+new Env('LK签到');
+"""
 from api import *
 from config import Config
 
