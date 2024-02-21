@@ -237,7 +237,7 @@ def request_api(url, data, method="POST"):
         f"数据: {response.request.body}\n 返回数据: {response.text}\n ")
 
     if body['code'] != 0:
-        logging.error("请求url: %s 出错⚠️\n 数据: %s\n 错误信息: %s", url, data, body['data'])
+        logging.error("请求url: %s 出错⚠️\n 数据: %s\n 错误信息: %s", url, data, body.get('data'))
         return None
 
     return body.get('data', True)
