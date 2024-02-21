@@ -72,7 +72,7 @@ def get_target_article():
             time.sleep(1)  # 防止请求过快
             article_id = article_list[order]['aid']
             done = article_like(article_id)
-            status = task_complete(3) if done else False
+            status = task_complete(3)[0] if done else False
             # 更改page和order
             if order == 0:
                 page -= 1
@@ -83,6 +83,7 @@ def get_target_article():
             # 如果任务完成，返回文章id ；如果尝试次数超过限制，返回默认文章id
             if status or try_time > try_time_limit:
                 user['page'], user['order'] = page, order
+                logging.error(f"尝试次数超过限制") if not status else None
                 return article_id
 
             try_time += 1
