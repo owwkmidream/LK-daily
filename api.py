@@ -53,10 +53,14 @@ def get_article_by_cate(page):
 
 # noinspection PyUnusedLocal
 def share_article(aid):
-    task_complete(5)
+    return task_complete(5)
 
 
 def get_target_article():
+    """
+
+    :return: 目标文章id，消息
+    """
     def_page, def_order = 5783, 19
     user = config.get('user')
     page, order = user.get("page", def_page), user.get('order', def_order)
@@ -72,7 +76,7 @@ def get_target_article():
             time.sleep(1)  # 防止请求过快
             article_id = article_list[order]['aid']
             done = article_like(article_id)
-            status = task_complete(3)[0] if done else False
+            status, msg = task_complete(3) if done else False
             # 更改page和order
             if order == 0:
                 page -= 1
@@ -81,12 +85,15 @@ def get_target_article():
                 order -= 1
 
             # 如果任务完成，返回文章id ；如果尝试次数超过限制，返回默认文章id
-            if status or try_time > try_time_limit:
-                user['page'], user['order'] = page, order
-                logging.error(f"尝试次数超过限制") if not status else None
-                return article_id
-
+            user['page'], user['order'] = page, order
             try_time += 1
+
+            if status:
+                return article_id, msg
+            if try_time > try_time_limit:
+                logging.error("获取目标文章失败，次数超限⚠️")
+                return article_id, msg
+
 
 
 def task_complete(id_):

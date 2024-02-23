@@ -36,7 +36,8 @@ def process_tasks():
     }
 
     # 首先获取目标文章
-    target_article_id = get_target_article()
+    target_article_id, msg = get_target_article()
+    success_info.append(msg) if '失败' not in msg else fail_info.append(msg)
 
     success_count = 0
     try_time_limit = 20
@@ -62,7 +63,9 @@ def process_tasks():
                 task_function = task_id_to_function.get(task['id'])
                 if task_function:
                     # 执行函数
-                    task_function(target_article_id)
+                    res = task_function(target_article_id)
+                    if task['id'] == 5:  # 分享任务
+                        success_info.append(res[1]) if res[0] else fail_info.append(res[1])
                 else:
                     logging.error(f"未找到任务ID {task['id']} 对应的函数")
             elif task['status'] == 1:
