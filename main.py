@@ -1,5 +1,5 @@
 """
-cron: 2 1 * * *
+cron: 2 0 * * *
 new Env('LK签到');
 """
 from datetime import datetime
