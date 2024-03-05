@@ -102,10 +102,14 @@ def process_tasks():
     user_post = get_user_liteInfo()
     try:
         username = user_post['nickname']
+        post_coin = user_post['coin']
+        post_exp = user_post['exp']
         coin = user_post['coin'] - user_pre['coin']
         exp = user_post['exp'] - user_pre['exp']
     except Exception as e:
         logging.error(f"硬币、经验获取失败⚠️{e}")
+        post_coin = 0
+        post_exp = 0
         coin = 0
         exp = 0
         username = "获取失败⚠️"
@@ -113,7 +117,7 @@ def process_tasks():
     # 推送信息
     push_msg = (
             f"📅 {datetime.now().strftime('%Y-%m-%d')} \n"
-            f"用户👤{username} 硬币💰{coin} 经验🌟{exp} \n"
+            f"用户👤{username} 硬币 {post_coin}💰+{coin} 经验 {post_exp}🌟+{exp} \n"
             + (f"🎉成功\n" + '\n'.join(success_info) if success_info else '')
             + (f"🚫失败\n" + '\n'.join(fail_info) if fail_info else '')
     )
